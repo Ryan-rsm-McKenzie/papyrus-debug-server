@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <functional>
 
+#include "DebugVariableFormVisitor.h"
+
 #include "f4se/PluginAPI.h"
 #include "f4se/PapyrusNativeFunctions.h"
 #include "f4se/PapyrusInterfaces.h"
@@ -14,21 +16,11 @@
 #include "champollion/Decompiler/StreamWriter.hpp"
 
 #include "Tasks.h"
+#include "Utilities.h"
 
 // TODO: Can use this if we want to change the behavior to only hit breakpoints once per line.
 // typedef UInt32(*_GetInstructionIndex)(void* instructionMetadata, UInt32 position);
 // RelocAddr<_GetInstructionIndex> GetInstructionIndex(0x0278a090);
-
-template<typename... Args>
-std::string string_format(const char* fmt, Args... args)
-{
-    size_t size = snprintf(nullptr, 0, fmt, args...);
-    std::string buf;
-    buf.reserve(size + 1);
-    buf.resize(size);
-    snprintf(&buf[0], size + 1, fmt, args...);
-    return buf;
-}
 
 // TODO: Need to audit 64-bit value passing to the client due to JavaScript precision loss.
 namespace DarkId::Papyrus::DebugServer
@@ -612,55 +604,54 @@ namespace DarkId::Papyrus::DebugServer
     // TODO: Properly read/reflect on form state.
     void PapyrusDebugger::ToRefVariables(VMRefOrInventoryObj* ref, std::vector<Variable>& variables)
     {
-        // TESObjectREFR* objReference = ref->GetObjectReference();
-        // if (objReference)
-        // {
-        //     Variable reference;
-        //     reference.name = "Reference";
-        //     reference.value = objReference->GetFullName();
+        TESObjectREFR* objReference = ref->GetObjectReference();
+        if (!objReference)
+        {
+            return;
+        }
+        
+        TESForm* baseForm = objReference->baseForm;
+        if (!baseForm)
+        {
+            return;
+        }
 
-        //     variables.push_back(reference);
+        DebugVariableFormVisitor formVisitor = DebugVariableFormVisitor();
+        formVisitor.Visit(baseForm, variables);
+/*
+        TESObjectREFR* ownerReference = ref->GetOwner();
+        if (ownerReference)
+        {
+            Variable reference;
+            reference.name = "Owner";
+            reference.value = ownerReference->GetFullName();
 
-        //     Variable reference2;
-        //     reference2.name = "Reference Editor ID";
-        //     reference2.value = objReference->GetEditorID();
+            variables.push_back(reference);
 
-        //     variables.push_back(reference2);
-        // }
+            Variable reference2;
+            reference2.name = "Owner Editor ID";
+            reference2.value = ownerReference->GetEditorID();
 
-        // TESObjectREFR* ownerReference = ref->GetOwner();
-        // if (ownerReference)
-        // {
-        //     Variable reference;
-        //     reference.name = "Owner";
-        //     reference.value = ownerReference->GetFullName();
+            variables.push_back(reference2);
+        }
 
-        //     variables.push_back(reference);
+        TESForm* baseForm;
+        ExtraDataList* extraData;
 
-        //     Variable reference2;
-        //     reference2.name = "Owner Editor ID";
-        //     reference2.value = ownerReference->GetEditorID();
+        if (ref->GetExtraData(&baseForm, &extraData))
+        {
+            Variable baseFormName;
+            baseFormName.name = "Form";
+            baseFormName.value = baseForm->GetFullName();
 
-        //     variables.push_back(reference2);
-        // }
+            variables.push_back(baseFormName);
 
-        // TESForm* baseForm;
-        // ExtraDataList* extraData;
+            Variable baseFormEditorId;
+            baseFormEditorId.name = "Form Editor ID";
+            baseFormEditorId.value = baseForm->GetEditorID();
 
-        // if (ref->GetExtraData(&baseForm, &extraData))
-        // {
-        //     Variable baseFormName;
-        //     baseFormName.name = "Form";
-        //     baseFormName.value = baseForm->GetFullName();
-
-        //     variables.push_back(baseFormName);
-
-        //     Variable baseFormEditorId;
-        //     baseFormEditorId.name = "Form Editor ID";
-        //     baseFormEditorId.value = baseForm->GetEditorID();
-
-        //     variables.push_back(baseFormEditorId);
-        // }
+            variables.push_back(baseFormEditorId);
+        }*/
     }
 
     HRESULT PapyrusDebugger::GetVariables(uint64_t variablesReference, VariablesFilter filter, int start, int count, std::vector<Variable> & variables)
@@ -720,10 +711,10 @@ namespace DarkId::Papyrus::DebugServer
                         return 1;
                     }
 
-                    // VMRefOrInventoryObj* refObject;
-                    // UnpackValue(&refObject, value);
+                    VMRefOrInventoryObj* refObject;
+                    UnpackValue(&refObject, value);
 
-                    // ToRefVariables(refObject, variables);
+                    ToRefVariables(refObject, variables);
 
                     VMObjectTypeInfo* objectType = (VMObjectTypeInfo*)value->GetComplexType();
 

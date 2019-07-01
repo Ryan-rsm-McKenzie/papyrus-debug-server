@@ -244,6 +244,12 @@
     <ClInclude Include="..\..\dependencies\f4se\src\f4se\f4se\GameExtraData.h">
       <Filter>F4SE</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\dependencies\f4se\src\f4se\f4se\GameForms.h">
+      <Filter>F4SE</Filter>
+    </ClInclude>
+    <ClInclude Include="FormVisitorBase.h" />
+    <ClInclude Include="DebugVariableFormVisitor.h" />
+    <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -371,6 +377,12 @@
     <ClCompile Include="..\..\dependencies\f4se\src\f4se\f4se\GameExtraData.cpp">
       <Filter>F4SE</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dependencies\f4se\src\f4se\f4se\GameForms.cpp">
+      <Filter>F4SE</Filter>
+    </ClCompile>
+    <ClCompile Include="FormVisitorBase.cpp" />
+    <ClCompile Include="DebugVariableFormVisitor.cpp" />
+    <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def">
