@@ -1,7 +1,7 @@
 #pragma once
-#include "f4se/PluginAPI.h"
+#include "xse.h"
 #include "PapyrusDebugger.h"
-#include "protocol/vscodeprotocol.h"
+#include "Protocol/vscodeprotocol.h"
 
 namespace DarkId::Papyrus::DebugServer
 {
@@ -14,7 +14,7 @@ namespace DarkId::Papyrus::DebugServer
 
         static DWORD WINAPI CommandLoopThreadStart(void* param);
     public:
-        DebugServerSession(std::function<void(std::string)> sendCallback, F4SETaskInterface* tasks);
+        DebugServerSession(std::function<void(std::string)> sendCallback, XSETaskInterface* tasks);
         
         void Receive(std::string message);
         void Close();

@@ -2,7 +2,7 @@
 
 #include "protocol/debugger.h"
 
-#include "f4se/PluginAPI.h"
+#include "xse.h"
 #include "RuntimeEvents.h"
 #include "PexCache.h"
 
