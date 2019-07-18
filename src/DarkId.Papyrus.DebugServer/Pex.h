@@ -1,6 +1,6 @@
 #pragma once
 
-#include "f4se/PapyrusInterfaces.h"
+#include "xse.h"
 #include "champollion/Pex/Binary.hpp"
 #include "PexStreamReader.hpp"
 

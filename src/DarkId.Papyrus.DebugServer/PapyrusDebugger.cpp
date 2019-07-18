@@ -3,12 +3,7 @@
 #include <algorithm>
 #include <functional>
 
-#include "f4se/PluginAPI.h"
-#include "f4se/PapyrusNativeFunctions.h"
-#include "f4se/PapyrusInterfaces.h"
-#include "f4se/GameThreads.h"
-#include "f4se/PapyrusStruct.h"
-#include "f4se/GameReferences.h"
+#include "xse.h"
 
 #include "champollion/Decompiler/PscCoder.hpp"
 #include "champollion/Decompiler/StreamWriter.hpp"
@@ -33,7 +28,7 @@ std::string string_format(const char* fmt, Args... args)
 // TODO: Need to audit 64-bit value passing to the client due to JavaScript precision loss.
 namespace DarkId::Papyrus::DebugServer
 {
-    PapyrusDebugger::PapyrusDebugger(Protocol* protocol, F4SETaskInterface* tasks)
+    PapyrusDebugger::PapyrusDebugger(Protocol* protocol, XSETaskInterface* tasks)
     {
         m_protocol = protocol;
 
@@ -352,7 +347,7 @@ namespace DarkId::Papyrus::DebugServer
         std::set<int> seenScripts;
         BSReadAndWriteLocker scriptLock(&m_vm->scriptsLock);
 
-        auto forAttachedScript = [this, &sources, &seenScripts](VirtualMachine::IdentifierItem* identifierItem)
+        auto forAttachedScript = [this, &sources, &seenScripts](VMIdentifierItem* identifierItem)
         {
             if (identifierItem->count > 1)
             {

@@ -7,9 +7,7 @@
 
 #include "f4se_common/Relocation.h"
 
-#include "f4se/PluginAPI.h"
-#include "f4se/PapyrusVM.h"
-#include "f4se/PapyrusNativeFunctions.h"
+#include "xse.h"
 
 #include "f4se_common/SafeWrite.h"
 

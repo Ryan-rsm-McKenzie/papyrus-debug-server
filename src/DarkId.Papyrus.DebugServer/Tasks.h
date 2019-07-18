@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "f4se/GameThreads.h"
+#include "xse.h"
 
 namespace DarkId::Papyrus::DebugServer
 

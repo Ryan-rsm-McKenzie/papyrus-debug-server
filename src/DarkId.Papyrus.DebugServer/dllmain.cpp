@@ -1,6 +1,4 @@
-#include "f4se/PluginAPI.h"
-#include "f4se_common/BranchTrampoline.h"
-#include "f4se_common/f4se_version.h"
+#include "xse.h"
 
 #include <shlobj.h>
 
@@ -14,17 +12,17 @@ const char* g_pluginName = "DarkId.Papyrus.DebugServer";
 UInt32 g_version = 1;
 PluginHandle g_pluginHandle = kPluginHandle_Invalid;
 
-const F4SEInterface* g_f4se;
-F4SEMessagingInterface* g_messaging;
-F4SETaskInterface* g_tasks;
+const XSEInterface* g_xse;
+XSEMessagingInterface* g_messaging;
+XSETaskInterface* g_tasks;
 
 DebugServer* g_debugServer;
 
-void F4SEMessageHandler(F4SEMessagingInterface::Message* msg)
+void XSEMessageHandler(XSEMessagingInterface::Message* msg)
 {
     switch (msg->type)
     {
-        case F4SEMessagingInterface::kMessage_GameLoaded:
+        case XSEMessagingInterface::kMessage_GameLoaded:
         {
             RuntimeEvents::Internal::CommitHooks();
 
@@ -38,11 +36,15 @@ void F4SEMessageHandler(F4SEMessagingInterface::Message* msg)
 
 extern "C"
 {
-    bool F4SEPlugin_Query(const F4SEInterface* f4se, PluginInfo* info)
+#if F4SE
+    bool F4SEPlugin_Query(const XSEInterface* xse, PluginInfo* info)
+#elif SKSE64
+    bool SKSEPlugin_Query(const XSEInterface* xse, PluginInfo* info)
+#endif
     {
         _MESSAGE("Registering debug server plugin...");
 
-        gLog.OpenRelative(CSIDL_MYDOCUMENTS, ("\\My Games\\Fallout4\\F4SE\\" + std::string(g_pluginName) + ".log").c_str());
+        gLog.OpenRelative(CSIDL_MYDOCUMENTS, ("\\My Games\\Fallout4\\XSE\\" + std::string(g_pluginName) + ".log").c_str());
 
         // populate info structure
         info->infoVersion = PluginInfo::kInfoVersion;
@@ -50,16 +52,16 @@ extern "C"
         info->version = g_version;
 
         // store plugin handle so we can identify ourselves later
-        g_pluginHandle = f4se->GetPluginHandle();
+        g_pluginHandle = xse->GetPluginHandle();
 
         // Check game version
-        if (f4se->runtimeVersion > CURRENT_RELEASE_RUNTIME) {
+        if (xse->runtimeVersion > CURRENT_RELEASE_RUNTIME) {
             char versionMessage[512];
             sprintf_s(versionMessage, sizeof(versionMessage), "Your game version: v%d.%d.%d.%d\nExpected versions: v%d.%d.%d.%d-v%d.%d.%d.%d\n%s will be disabled.",
-                GET_EXE_VERSION_MAJOR(f4se->runtimeVersion),
-                GET_EXE_VERSION_MINOR(f4se->runtimeVersion),
-                GET_EXE_VERSION_BUILD(f4se->runtimeVersion),
-                GET_EXE_VERSION_SUB(f4se->runtimeVersion),
+                GET_EXE_VERSION_MAJOR(xse->runtimeVersion),
+                GET_EXE_VERSION_MINOR(xse->runtimeVersion),
+                GET_EXE_VERSION_BUILD(xse->runtimeVersion),
+                GET_EXE_VERSION_SUB(xse->runtimeVersion),
                 GET_EXE_VERSION_MAJOR(RUNTIME_VERSION_1_10_130),
                 GET_EXE_VERSION_MINOR(RUNTIME_VERSION_1_10_130),
                 GET_EXE_VERSION_BUILD(RUNTIME_VERSION_1_10_130),
@@ -75,13 +77,17 @@ extern "C"
             return false;
         } 
 
-        g_messaging = (F4SEMessagingInterface*)f4se->QueryInterface(kInterface_Messaging);
-        g_tasks = (F4SETaskInterface*)f4se->QueryInterface(kInterface_Task);
+        g_messaging = (XSEMessagingInterface*)xse->QueryInterface(kInterface_Messaging);
+        g_tasks = (XSETaskInterface*)xse->QueryInterface(kInterface_Task);
 
         return true;
     }
 
-    bool F4SEPlugin_Load(const F4SEInterface * f4se)
+#if F4SE
+    bool F4SEPlugin_Load(const XSEInterface* xse)
+#elif SKSE64
+    bool SKSEPlugin_Load(const XSEInterface* xse)
+#endif
     {
         _MESSAGE("Initializing debug server...");
 
@@ -98,7 +104,7 @@ extern "C"
         }
 
         g_debugServer = new DebugServer(g_tasks);
-        g_messaging->RegisterListener(g_pluginHandle, "F4SE", F4SEMessageHandler);
+        g_messaging->RegisterListener(g_pluginHandle, "XSE", XSEMessageHandler);
 
         _MESSAGE("Waiting for GameLoaded event...");
 

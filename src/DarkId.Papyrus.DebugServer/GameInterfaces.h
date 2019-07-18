@@ -1,6 +1,6 @@
 #pragma once
 
-#include "f4se/PapyrusNativeFunctions.h"
+#include "xse.h"
 
 namespace DarkId::Papyrus::DebugServer::Game
 {
